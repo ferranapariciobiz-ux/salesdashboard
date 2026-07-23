@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLOSER
+  SETTER
+}
+
+model Rep {
+  id            String          @id @default(cuid())
+  name          String
+  role          Role
+  active        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  closerReports ClosingReport[]
+  setterReports SettingReport[]
+}
+
+// One row per closer per calendar day. Re-submitting the same rep+date
+// upserts (via the unique constraint) instead of creating a duplicate.
+model ClosingReport {
+  id             String   @id @default(cuid())
+  repId          String
+  rep            Rep      @relation(fields: [repId], references: [id])
+  date           DateTime
+
+  callsScheduled Int
+  callsTaken     Int
+  qualifiedDemos Int @default(0)
+  noShows        Int
+  cancelled      Int
+  rescheduled    Int
+  dqs            Int
+  offers         Int
+  closes         Int
+  noCloses       Int @default(0)
+
+  depositsAmount Float
+  cashCollected  Float
+  revenue        Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([repId, date])
+}
+
+// One row per setter per calendar day.
+model SettingReport {
+  id               String   @id @default(cuid())
+  repId            String
+  rep              Rep      @relation(fields: [repId], references: [id])
+  date             DateTime
+
+  // Legacy fields
+  outboundDials    Int @default(0)
+  inboundTriages   Int @default(0)
+  dqs              Int @default(0)
+  newSets          Int @default(0)
+  triagesCompleted Int @default(0)
+
+  // Inbound calendar opportunity tracking
+  inboundCalls          Int @default(0)
+  inboundNoShows        Int @default(0)
+  inboundRescheduled    Int @default(0)
+  inboundCallsTaken     Int @default(0)
+  inboundBadFit         Int @default(0)
+  inboundFollowUpNeeded Int @default(0)
+  inboundSets           Int @default(0)
+
+  // Triage tracking (DQ requalification)
+  triagesAssigned        Int @default(0)
+  triagesCancelledDq     Int @default(0)
+  triagesSuccessful      Int @default(0)
+
+  // Outbound dialing tracking
+  outboundPickups       Int @default(0)
+  outboundConvos        Int @default(0)
+  outboundDqs           Int @default(0)
+  outboundFollowups     Int @default(0)
+  outboundSets          Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([repId, date])
+}
