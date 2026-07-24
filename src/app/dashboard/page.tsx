@@ -14,10 +14,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function isoDaysAgo(days: number): string {
+function isoStartOfMonth(): string {
   const d = new Date();
-  d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
+  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
 }
 
 function isoToday(): string {
@@ -30,7 +29,7 @@ export default async function DashboardPage({
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
   const sp = await searchParams;
-  const from = sp.from ?? isoDaysAgo(6);
+  const from = sp.from ?? isoStartOfMonth();
   const to = sp.to ?? isoToday();
 
   const fromDate = new Date(`${from}T00:00:00.000Z`);
