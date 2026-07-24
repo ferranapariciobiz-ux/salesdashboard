@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { submitDailyReport, type ActionResult } from "@/app/actions";
 
 type Rep = { id: string; name: string; role: "CLOSER" | "SETTER" };
@@ -62,7 +63,15 @@ const SETTER_FIELDS: Field[] = [
 
 const initialState: ActionResult | null = null;
 
-export default function ReportForm({ reps }: { reps: Rep[] }) {
+export default function ReportForm({
+  reps,
+  redirectOnSuccess = false,
+}: {
+  reps: Rep[];
+  /** Admin-only view: bounce to /dashboard after a successful submit instead of resetting in place. */
+  redirectOnSuccess?: boolean;
+}) {
+  const router = useRouter();
   const [repId, setRepId] = useState(reps[0]?.id ?? "");
   const [date, setDate] = useState(todayLocal());
   const [formKey, setFormKey] = useState(0);
@@ -71,13 +80,19 @@ export default function ReportForm({ reps }: { reps: Rep[] }) {
   const selectedRep = useMemo(() => reps.find((r) => r.id === repId), [reps, repId]);
   const fields = selectedRep?.role === "SETTER" ? SETTER_FIELDS : CLOSER_FIELDS;
 
-  // Reset the number inputs after a successful submit by adjusting state
-  // during render (rather than in an effect) per React's guidance at
+  // React to a successful submit by adjusting state during render (rather
+  // than in an effect) per React's guidance at
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   const [lastState, setLastState] = useState(state);
   if (state !== lastState) {
     setLastState(state);
-    if (state?.ok) setFormKey((k) => k + 1);
+    if (state?.ok) {
+      if (redirectOnSuccess) {
+        setTimeout(() => router.push("/dashboard"), 1500);
+      } else {
+        setFormKey((k) => k + 1);
+      }
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
