@@ -139,7 +139,7 @@ export default async function DashboardPage({
             { key: "offerRate", label: "Offer Rate", value: formatPct(closerMetrics.offerRate) },
             { key: "closeRate", label: "Close Rate", value: formatPct(closerMetrics.closeRate) },
             { key: "offerToCloseRate", label: "Offer to Close Rate", value: formatPct(closerMetrics.offerToCloseRate) },
-            { key: "cashPerCall", label: "Cash per Call Taken", value: formatUsd(closerMetrics.cashPerBookedCall) },
+            { key: "cashPerCall", label: "Cash per Call Taken", value: formatUsd(closerMetrics.cashPerCallTaken) },
             { key: "aov", label: "AOV", value: formatUsd(closerMetrics.aov) },
             { key: "upfront", label: "Upfront Cash %", value: formatPct(closerMetrics.upfrontCashPercent) },
           ].map(({ key, label, value }) => (
