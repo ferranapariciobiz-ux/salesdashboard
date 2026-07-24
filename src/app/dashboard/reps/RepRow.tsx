@@ -11,8 +11,8 @@ export default function RepRow({ rep }: { rep: Rep }) {
   return (
     <li className="flex items-center justify-between px-4 py-3">
       <div>
-        <p className="text-sm font-medium text-neutral-900">{rep.name}</p>
-        <p className="text-xs text-neutral-500">{rep.role === "CLOSER" ? "Closer" : "Setter"}</p>
+        <p className="text-sm font-medium text-neutral-50">{rep.name}</p>
+        <p className="text-xs text-neutral-400">{rep.role === "CLOSER" ? "Closer" : "Setter"}</p>
       </div>
       <button
         disabled={isPending}
