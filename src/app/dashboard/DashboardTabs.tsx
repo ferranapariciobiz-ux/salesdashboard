@@ -72,6 +72,12 @@ export default function DashboardTabs({
             Import data
           </Link>
           <Link
+            href="/dashboard/export"
+            className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+          >
+            Export data
+          </Link>
+          <Link
             href="/report"
             className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
           >
