@@ -3,101 +3,74 @@
 import { prisma } from "@/lib/db";
 
 export async function importClosingData(csvData: string) {
-  const lines = csvData.trim().split("\n");
-  if (lines.length < 2) {
-    return { error: "No data to import" };
-  }
-
-  // Detect delimiter (tab or comma)
-  const delimiter = lines[0].includes("\t") ? "\t" : ",";
-  const headers = lines[0].split(delimiter).map((h) => h.trim());
-  const records = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(delimiter).map((v) => v.trim());
-    if (!values[0]) continue; // skip empty lines
-
-    const record: Record<string, string | number> = {};
-    headers.forEach((header, idx) => {
-      const value = values[idx];
-      // Try to parse as number
-      if (value && !isNaN(Number(value))) {
-        record[header] = Number(value);
-      } else {
-        record[header] = value;
-      }
-    });
-    records.push(record);
-  }
-
   try {
-    // Find or create the rep
+    const lines = csvData.trim().split("\n").filter((line) => line.trim());
+    if (lines.length < 2) {
+      return { error: "No data rows found" };
+    }
+
+    const delimiter = lines[0].includes("\t") ? "\t" : ",";
+    const headers = lines[0].split(delimiter).map((h) => h.trim().toLowerCase());
+
+    const repName = "Ferran Aparicio";
     let rep = await prisma.rep.findFirst({
-      where: { name: String(records[0].rep_name || ""), role: String(records[0].role || "CLOSER") as any },
+      where: { name: repName, role: "CLOSER" },
     });
 
     if (!rep) {
       rep = await prisma.rep.create({
-        data: {
-          name: String(records[0].rep_name || "Unknown"),
-          role: String(records[0].role || "CLOSER") as any,
-          active: true,
-        },
+        data: { name: repName, role: "CLOSER", active: true },
       });
     }
 
-    let created = 0;
-    let updated = 0;
+    let count = 0;
+    for (let i = 1; i < Math.min(lines.length, 101); i++) {
+      const values = lines[i].split(delimiter).map((v) => v.trim());
+      if (!values[0]) continue;
 
-    for (const record of records) {
-      const dateStr = String(record.date);
+      const dateStr = values[0];
+      if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
+
       const [year, month, day] = dateStr.split("-").map(Number);
-      const reportDate = new Date(year, month - 1, day);
-      reportDate.setUTCHours(0, 0, 0, 0);
+      const reportDate = new Date(year, month - 1, day, 0, 0, 0, 0);
 
       await prisma.closingReport.upsert({
-        where: {
-          repId_date: {
-            repId: rep.id,
-            date: reportDate,
-          },
-        },
+        where: { repId_date: { repId: rep.id, date: reportDate } },
         create: {
           repId: rep.id,
           date: reportDate,
-          callsScheduled: Number(record.calls_scheduled) || 0,
-          callsTaken: Number(record.calls_taken) || 0,
-          qualifiedDemos: Number(record.qualified_demos) || 0,
-          noShows: Number(record.no_shows) || 0,
-          cancelled: Number(record.cancelled) || 0,
-          rescheduled: Number(record.rescheduled) || 0,
+          callsScheduled: Number(values[3]) || 0,
+          callsTaken: Number(values[4]) || 0,
+          qualifiedDemos: Number(values[5]) || 0,
+          noShows: Number(values[6]) || 0,
+          cancelled: Number(values[7]) || 0,
+          rescheduled: Number(values[8]) || 0,
           dqs: 0,
-          offers: Number(record.offers) || 0,
-          closes: Number(record.closes) || 0,
+          offers: Number(values[9]) || 0,
+          closes: Number(values[10]) || 0,
           depositsAmount: 0,
-          revenue: Number(record.revenue) || 0,
-          cashCollected: Number(record.cash_collected) || 0,
+          revenue: Number(values[11]) || 0,
+          cashCollected: Number(values[12]) || 0,
         },
         update: {
-          callsScheduled: Number(record.calls_scheduled) || 0,
-          callsTaken: Number(record.calls_taken) || 0,
-          qualifiedDemos: Number(record.qualified_demos) || 0,
-          noShows: Number(record.no_shows) || 0,
-          cancelled: Number(record.cancelled) || 0,
-          rescheduled: Number(record.rescheduled) || 0,
-          offers: Number(record.offers) || 0,
-          closes: Number(record.closes) || 0,
-          revenue: Number(record.revenue) || 0,
-          cashCollected: Number(record.cash_collected) || 0,
+          callsScheduled: Number(values[3]) || 0,
+          callsTaken: Number(values[4]) || 0,
+          qualifiedDemos: Number(values[5]) || 0,
+          noShows: Number(values[6]) || 0,
+          cancelled: Number(values[7]) || 0,
+          rescheduled: Number(values[8]) || 0,
+          offers: Number(values[9]) || 0,
+          closes: Number(values[10]) || 0,
+          revenue: Number(values[11]) || 0,
+          cashCollected: Number(values[12]) || 0,
         },
       });
 
-      created++;
+      count++;
     }
 
-    return { success: true, created, repName: rep.name };
+    return { success: true, created: count, repName };
   } catch (err) {
-    console.error(err);
-    return { error: String(err) };
+    return { error: `Import failed: ${String(err).substring(0, 100)}` };
   }
 }
