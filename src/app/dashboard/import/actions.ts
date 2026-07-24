@@ -8,11 +8,13 @@ export async function importClosingData(csvData: string) {
     return { error: "No data to import" };
   }
 
-  const headers = lines[0].split(",").map((h) => h.trim());
+  // Detect delimiter (tab or comma)
+  const delimiter = lines[0].includes("\t") ? "\t" : ",";
+  const headers = lines[0].split(delimiter).map((h) => h.trim());
   const records = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(",").map((v) => v.trim());
+    const values = lines[i].split(delimiter).map((v) => v.trim());
     if (!values[0]) continue; // skip empty lines
 
     const record: Record<string, string | number> = {};
