@@ -2,6 +2,24 @@
 
 import { prisma } from "@/lib/db";
 
+export async function deleteAllData() {
+  try {
+    const rep = await prisma.rep.findFirst({
+      where: { name: "Ferran Aparicio", role: "CLOSER" },
+    });
+
+    if (!rep) return { error: "Rep not found" };
+
+    const deleted = await prisma.closingReport.deleteMany({
+      where: { repId: rep.id },
+    });
+
+    return { success: true, deleted: deleted.count };
+  } catch (err) {
+    return { error: String(err) };
+  }
+}
+
 export async function updateDatesToYear(targetYear: number) {
   try {
     const rep = await prisma.rep.findFirst({

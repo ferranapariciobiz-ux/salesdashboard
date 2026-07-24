@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { importClosingData, updateDatesToYear } from "./actions";
+import { importClosingData, updateDatesToYear, deleteAllData } from "./actions";
 
 export default function ImportPage() {
   const [csv, setCsv] = useState("");
@@ -36,6 +36,30 @@ export default function ImportPage() {
         <p className="mb-6 text-sm text-neutral-400">
           Paste your CSV data below. Format: date, rep_name, role, calls_scheduled, calls_taken, qualified_demos, no_shows, cancelled, rescheduled, offers, closes, revenue, cash_collected
         </p>
+
+        <div className="mb-6 rounded-lg border border-red-700/50 bg-red-900/20 p-4">
+          <p className="mb-3 text-sm font-medium text-red-200">⚠️ Delete all incorrect data first</p>
+          <button
+            onClick={async () => {
+              if (!confirm("Delete all Ferran Aparicio's data? This cannot be undone.")) return;
+              setLoading(true);
+              const result = await deleteAllData();
+              setLoading(false);
+              if (result.error) {
+                setMessage({ type: "error", text: result.error });
+              } else {
+                setMessage({
+                  type: "success",
+                  text: `✓ Deleted ${result.deleted} records. Ready to import fresh data.`,
+                });
+              }
+            }}
+            disabled={loading}
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-neutral-600"
+          >
+            {loading ? "Deleting..." : "Delete All Data"}
+          </button>
+        </div>
 
         <div className="space-y-4">
           <textarea
