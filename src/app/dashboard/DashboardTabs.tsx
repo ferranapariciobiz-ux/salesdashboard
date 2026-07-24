@@ -36,8 +36,8 @@ export default function DashboardTabs({
   };
 
   return (
-    <div className="flex min-h-screen bg-neutral-900 text-neutral-50">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950/40 px-3 py-6">
+    <div className="flex h-screen bg-neutral-900 text-neutral-50">
+      <aside className="flex h-screen w-56 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950/40 px-3 py-6">
         <Link href="/" className="mb-8 px-2 text-sm font-semibold tracking-tight hover:opacity-80">
           Sales Dashboard
         </Link>
@@ -88,7 +88,7 @@ export default function DashboardTabs({
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1">
+      <main className="h-screen min-w-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-6 py-8">
           <h1 className="mb-8 text-3xl font-bold">{TITLES[activeTab]}</h1>
           {content[activeTab]}
