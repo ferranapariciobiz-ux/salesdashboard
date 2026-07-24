@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { importClosingData } from "./actions";
+import { importClosingData, updateDatesToYear } from "./actions";
 
 export default function ImportPage() {
   const [csv, setCsv] = useState("");
@@ -64,6 +64,32 @@ export default function ImportPage() {
               {message.text}
             </div>
           )}
+
+          <div className="mt-8 border-t border-neutral-700 pt-6">
+            <h2 className="mb-4 font-semibold text-neutral-200">Fix Date Year</h2>
+            <p className="mb-4 text-sm text-neutral-400">
+              If your data was imported as 2024 but should be 2026, click below:
+            </p>
+            <button
+              onClick={async () => {
+                setLoading(true);
+                const result = await updateDatesToYear(2026);
+                setLoading(false);
+                if (result.error) {
+                  setMessage({ type: "error", text: result.error });
+                } else {
+                  setMessage({
+                    type: "success",
+                    text: `✓ Updated ${result.updated} dates to 2026`,
+                  });
+                }
+              }}
+              disabled={loading}
+              className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-neutral-600"
+            >
+              {loading ? "Updating..." : "Update All Dates to 2026"}
+            </button>
+          </div>
         </div>
 
         <div className="mt-8 rounded-lg border border-neutral-700 bg-neutral-800 p-4">

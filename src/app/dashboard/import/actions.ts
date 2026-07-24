@@ -2,6 +2,34 @@
 
 import { prisma } from "@/lib/db";
 
+export async function updateDatesToYear(targetYear: number) {
+  try {
+    const rep = await prisma.rep.findFirst({
+      where: { name: "Ferran Aparicio", role: "CLOSER" },
+    });
+
+    if (!rep) return { error: "Ferran Aparicio not found" };
+
+    const reports = await prisma.closingReport.findMany({
+      where: { repId: rep.id },
+    });
+
+    for (const report of reports) {
+      const newDate = new Date(report.date);
+      newDate.setFullYear(targetYear);
+
+      await prisma.closingReport.update({
+        where: { id: report.id },
+        data: { date: newDate },
+      });
+    }
+
+    return { success: true, updated: reports.length };
+  } catch (err) {
+    return { error: String(err) };
+  }
+}
+
 export async function importClosingData(csvData: string) {
   try {
     const lines = csvData.trim().split("\n").filter((line) => line.trim());
