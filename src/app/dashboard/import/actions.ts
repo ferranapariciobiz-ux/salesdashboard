@@ -48,7 +48,9 @@ export async function importClosingData(csvData: string) {
     let updated = 0;
 
     for (const record of records) {
-      const reportDate = new Date(String(record.date));
+      const dateStr = String(record.date);
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const reportDate = new Date(year, month - 1, day);
       reportDate.setUTCHours(0, 0, 0, 0);
 
       await prisma.closingReport.upsert({
