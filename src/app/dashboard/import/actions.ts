@@ -20,6 +20,30 @@ export async function deleteAllData() {
   }
 }
 
+export async function delete2024Data() {
+  try {
+    const rep = await prisma.rep.findFirst({
+      where: { name: "Ferran Aparicio", role: "CLOSER" },
+    });
+
+    if (!rep) return { error: "Rep not found" };
+
+    const deleted = await prisma.closingReport.deleteMany({
+      where: {
+        repId: rep.id,
+        date: {
+          gte: new Date("2024-01-01"),
+          lt: new Date("2025-01-01"),
+        },
+      },
+    });
+
+    return { success: true, deleted: deleted.count };
+  } catch (err) {
+    return { error: String(err) };
+  }
+}
+
 export async function updateDatesToYear(targetYear: number) {
   try {
     const rep = await prisma.rep.findFirst({
