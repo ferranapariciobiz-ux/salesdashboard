@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useMemo, useState } from "react";
 import { submitDailyReport, type ActionResult } from "@/app/actions";
 
 type Rep = { id: string; name: string; role: "CLOSER" | "SETTER" };
@@ -64,22 +63,22 @@ const SETTER_FIELDS: Field[] = [
 const initialState: ActionResult | null = null;
 
 export default function ReportForm({ reps }: { reps: Rep[] }) {
-  const router = useRouter();
   const [repId, setRepId] = useState(reps[0]?.id ?? "");
   const [date, setDate] = useState(todayLocal());
+  const [formKey, setFormKey] = useState(0);
   const [state, formAction, pending] = useActionState(submitDailyReport, initialState);
 
   const selectedRep = useMemo(() => reps.find((r) => r.id === repId), [reps, repId]);
   const fields = selectedRep?.role === "SETTER" ? SETTER_FIELDS : CLOSER_FIELDS;
 
-  useEffect(() => {
-    if (state?.ok) {
-      const timer = setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [state, router]);
+  // Reset the number inputs after a successful submit by adjusting state
+  // during render (rather than in an effect) per React's guidance at
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [lastState, setLastState] = useState(state);
+  if (state !== lastState) {
+    setLastState(state);
+    if (state?.ok) setFormKey((k) => k + 1);
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -137,7 +136,7 @@ export default function ReportForm({ reps }: { reps: Rep[] }) {
         <h2 className="mb-4 text-sm font-semibold text-neutral-50">Daily Metrics</h2>
 
         {selectedRep?.role === "SETTER" ? (
-          <div className="space-y-6">
+          <div key={formKey} className="space-y-6">
             {/* Section 1: Inbound Setting */}
             <div>
               <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-500">Section 1: Inbound Setting</h3>
@@ -217,7 +216,7 @@ export default function ReportForm({ reps }: { reps: Rep[] }) {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div key={formKey} className="grid grid-cols-2 gap-4">
             {fields.map((f) => (
               <div key={f.key} className={f.dollar ? "col-span-2" : ""}>
                 <label className="block text-xs font-medium uppercase tracking-wide text-neutral-400">{f.label}</label>
