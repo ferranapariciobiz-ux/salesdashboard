@@ -162,15 +162,6 @@ export default async function DashboardPage({
           </div>
         </section>
       )}
-
-      <div key="footer-links" className="flex gap-4 pt-4">
-        <a href="/dashboard/reps" className="text-sm font-medium underline hover:opacity-75 transition">
-          Manage reps
-        </a>
-        <a href="/report" className="text-sm font-medium underline hover:opacity-75 transition">
-          Submit a report
-        </a>
-      </div>
     </div>
   );
 

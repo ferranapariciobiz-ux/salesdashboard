@@ -5,13 +5,12 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const connectionString = process.env.DATABASE_URL ?? process.env.NETLIFY_DB_URL;
-
-if (!connectionString) {
-  throw new Error(
-    "No database connection string found. Set DATABASE_URL (or NETLIFY_DB_URL when using Netlify DB)."
-  );
-}
+// Read lazily rather than throwing at module load: Next's build-time
+// "collect page configuration" step imports every route module (even
+// force-dynamic ones) just to read their exports, so throwing here would
+// break `next build` in any environment where the DB env var isn't set
+// yet, even though no query actually runs until a request comes in.
+const connectionString = process.env.DATABASE_URL ?? process.env.NETLIFY_DB_URL ?? "";
 
 const adapter = new PrismaPg({ connectionString });
 

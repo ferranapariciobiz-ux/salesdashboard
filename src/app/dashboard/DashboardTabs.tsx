@@ -1,10 +1,22 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { logout } from "../login/actions";
 
 type Tab = "main" | "closers" | "setters";
+
+const NAV_ITEMS: { key: Tab; label: string }[] = [
+  { key: "main", label: "Main" },
+  { key: "closers", label: "Closers" },
+  { key: "setters", label: "Setters" },
+];
+
+const TITLES: Record<Tab, string> = {
+  main: "Sales Dashboard",
+  closers: "Closers Performance",
+  setters: "Setters Performance",
+};
 
 export default function DashboardTabs({
   mainContent,
@@ -17,94 +29,65 @@ export default function DashboardTabs({
 }) {
   const [activeTab, setActiveTab] = useState<Tab>("main");
 
-  let content: React.ReactNode;
-  let title: string;
-  let showBackButton: boolean;
-  let currentContent: React.ReactNode;
-
-  switch (activeTab) {
-    case "closers":
-      content = closersContent;
-      title = "Closers Performance";
-      showBackButton = true;
-      currentContent = closersContent;
-      break;
-    case "setters":
-      content = settersContent;
-      title = "Setters Performance";
-      showBackButton = true;
-      currentContent = settersContent;
-      break;
-    default:
-      content = mainContent;
-      title = "Sales Dashboard";
-      showBackButton = false;
-      currentContent = mainContent;
-  }
+  const content: Record<Tab, React.ReactNode> = {
+    main: mainContent,
+    closers: closersContent,
+    setters: settersContent,
+  };
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-neutral-50">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{title}</h1>
-          <div className="flex items-center gap-4">
-            {showBackButton ? (
-              <button
-                onClick={() => setActiveTab("main")}
-                className="text-sm underline hover:opacity-75"
-              >
-                ← Back to main
-              </button>
-            ) : (
-              <Link href="/" className="text-sm underline hover:opacity-75">
-                Back to home
-              </Link>
-            )}
-            <form action={logout}>
-              <button type="submit" className="text-sm text-neutral-400 underline hover:text-neutral-50">
-                Log out
-              </button>
-            </form>
-          </div>
-        </div>
+    <div className="flex min-h-screen bg-neutral-900 text-neutral-50">
+      <aside className="flex w-56 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950/40 px-3 py-6">
+        <Link href="/" className="mb-8 px-2 text-sm font-semibold tracking-tight hover:opacity-80">
+          Sales Dashboard
+        </Link>
 
-        <div className="mb-8 flex gap-4 border-b border-neutral-700 pb-4">
-          <button
-            onClick={() => setActiveTab("main")}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === "main"
-                ? "text-neutral-50 border-b-2 border-amber-500"
-                : "text-neutral-400 hover:text-neutral-50"
-            }`}
-          >
-            Main
-          </button>
-          <button
-            onClick={() => setActiveTab("closers")}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === "closers"
-                ? "text-neutral-50 border-b-2 border-amber-500"
-                : "text-neutral-400 hover:text-neutral-50"
-            }`}
-          >
-            Closers
-          </button>
-          <button
-            onClick={() => setActiveTab("setters")}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === "setters"
-                ? "text-neutral-50 border-b-2 border-amber-500"
-                : "text-neutral-400 hover:text-neutral-50"
-            }`}
-          >
-            Setters
-          </button>
-        </div>
+        <nav className="flex flex-col gap-1">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setActiveTab(item.key)}
+              className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+                activeTab === item.key
+                  ? "bg-amber-500 text-neutral-900"
+                  : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
 
-        <Fragment key={`content-${activeTab}`}>
-          {currentContent}
-        </Fragment>
-      </div>
+        <div className="mt-auto flex flex-col gap-1 border-t border-neutral-800 pt-4">
+          <Link
+            href="/dashboard/reps"
+            className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+          >
+            Manage reps
+          </Link>
+          <Link
+            href="/report"
+            className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+          >
+            Submit a report
+          </Link>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+            >
+              Log out
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          <h1 className="mb-8 text-3xl font-bold">{TITLES[activeTab]}</h1>
+          {content[activeTab]}
+        </div>
+      </main>
     </div>
   );
 }
