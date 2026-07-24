@@ -7,6 +7,7 @@ export default function ImportPage() {
   const [csv, setCsv] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   async function handleImport() {
     if (!csv.trim()) {
@@ -39,26 +40,40 @@ export default function ImportPage() {
 
         <div className="mb-6 rounded-lg border border-red-700/50 bg-red-900/20 p-4">
           <p className="mb-3 text-sm font-medium text-red-200">⚠️ Delete all incorrect data first</p>
-          <button
-            onClick={async () => {
-              if (!confirm("Delete all Ferran Aparicio's data? This cannot be undone.")) return;
-              setLoading(true);
-              const result = await deleteAllData();
-              setLoading(false);
-              if (result.error) {
-                setMessage({ type: "error", text: result.error });
-              } else {
-                setMessage({
-                  type: "success",
-                  text: `✓ Deleted ${result.deleted} records. Ready to import fresh data.`,
-                });
-              }
-            }}
-            disabled={loading}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-neutral-600"
-          >
-            {loading ? "Deleting..." : "Delete All Data"}
-          </button>
+          <p className="mb-3 text-xs text-red-300">Type DELETE and click the button:</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="Type DELETE"
+              className="flex-1 rounded-lg bg-neutral-800 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-red-500 focus:outline-none"
+            />
+            <button
+              onClick={async () => {
+                if (deleteConfirm !== "DELETE") {
+                  setMessage({ type: "error", text: "Type DELETE to confirm" });
+                  return;
+                }
+                setLoading(true);
+                const result = await deleteAllData();
+                setLoading(false);
+                setDeleteConfirm("");
+                if (result.error) {
+                  setMessage({ type: "error", text: result.error });
+                } else {
+                  setMessage({
+                    type: "success",
+                    text: `✓ Deleted ${result.deleted} records. Ready to import fresh data.`,
+                  });
+                }
+              }}
+              disabled={loading || deleteConfirm !== "DELETE"}
+              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-neutral-600"
+            >
+              {loading ? "Deleting..." : "Delete"}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4">
