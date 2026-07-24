@@ -2,7 +2,15 @@ export default function ExportPage() {
   return (
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-lg">
-        <h1 className="mb-2 text-3xl font-bold text-neutral-50">Export Data</h1>
+        <div className="mb-2 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-neutral-50">Export Data</h1>
+          <a
+            href="/dashboard"
+            className="text-sm font-medium text-neutral-300 underline transition hover:text-neutral-50"
+          >
+            ← Back to Dashboard
+          </a>
+        </div>
         <p className="mb-8 text-sm text-neutral-400">
           Download every report as a CSV file that opens directly in Excel or Google Sheets.
         </p>

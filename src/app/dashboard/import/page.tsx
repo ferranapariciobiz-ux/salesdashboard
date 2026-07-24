@@ -37,7 +37,15 @@ export default function ImportPage() {
   return (
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-2 text-3xl font-bold text-neutral-50">Import Data</h1>
+        <div className="mb-2 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-neutral-50">Import Data</h1>
+          <a
+            href="/dashboard"
+            className="text-sm font-medium text-neutral-300 underline transition hover:text-neutral-50"
+          >
+            ← Back to Dashboard
+          </a>
+        </div>
         <p className="mb-6 text-sm text-neutral-400">
           Select all the cells in your Google Sheet (including the header row) and paste them
           below — no reformatting needed. Columns are matched by name, so nothing gets misaligned.
